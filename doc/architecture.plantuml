@@ -1,0 +1,116 @@
+@startuml Software Architecture
+
+skinparam classFontSize 16
+skinparam ClassAttributeFontSize 14
+skinparam PackageFontSize 14
+
+' class siren.SineLayer
+' {
+'     +in_features : int
+'     +out_features : int
+'     +is_first : bool
+'     +omega_0 : float
+
+'     +forward(input: Tensor) : Tensor
+' }
+
+' class siren.Siren
+' {
+'     +in_features : int
+'     +hidden_features : int
+'     +hidden_layers : int
+'     +out_features : int
+'     +first_omega_0 : float
+'     +hidden_omega_0 : float
+'     -net : List[SineLayer]
+
+'     +forward(input: Tensor) : Tuple[Tensor, Tensor]
+' }
+
+class neural_density_map.ContinuousRegion
+{
+    +x_start : float
+    +x_end : float
+    +y_start : float
+    +y_end : float
+    +z_start : float
+    +z_end : float
+
+    +contains_points(points: ndarray) : ndarray
+    +get_sample_shape(step_x: float, step_y: float,
+    \tstep_z: float) : Tuple[int, int, int]
+    +generate_sample_points(step_x: float, step_y: float,
+    \tstep_z: float) : ndarray
+}
+
+class neural_density_map.NeuralDensityRegion
+{
+    +name : str
+    +region : ContinuousRegion
+    +in_features : int
+    +out_features : int
+    +hidden_features : int
+    +hidden_layers : int
+    +epochs : int
+    +loss : float
+    +training_time : float
+    +model_state : Dict
+
+    +get_values(points: ndarray) : ndarray
+    +save(filename: str)
+    {static} +create_from_voxels(name: str, voxels: ndarray,
+    \tregion: ContinuousRegion) : NeuralDensityRegion
+    {static} +load(filename: str) : NeuralDensityRegion
+}
+
+class neural_density_map.NeuralDensityMap
+{
+    +map_id : string
+    +voxel_size : int, int, int
+    +voxel_shape : float, float, float
+    +voxel_origin : float, float, float
+    +original_std : float
+    +original_mean : float
+    +region : ContinuousRegion
+    -sub_regions : Dict[str, NeuralDensityRegion]
+
+    +get_densities(points: ndarray) : ndarray
+    +get_gradients(points: ndarray) : ndarray
+    +sample_densities(step_x: float, step_y: float,
+    \tstep_z: float) : ndarray
+    +sample_gradients(step_x: float, step_y: float,
+    \tstep_z: float) : ndarray
+    +sample_points(step_x: float, step_y: float,
+    \tstep_z: float, threshold: float) : ndarray
+    +to_voxel_density_map(voxel_size: Tuple[float, float, float]) : ndarray
+    +save_as_voxel_map(filename: str,
+    \tvoxel_size: Tuple[float, float, float])
+    +save(filename: str)
+    {static} +from_voxel_data(map_id: str, voxels: ndarray, voxel_size: Tuple[float, float, float],
+    \torigin: Tuple[float, float, float]) : NeuralDensityMap
+    {static} +from_voxel_map(file: str, contour: float) : NeuralDensityMap
+    {static} +load(filename: str) : NeuralDensityMap
+}
+
+class density_graph.DensityGraph
+{
+    +graph : networkx.Graph
+
+    +save_as_mmcif(filename: str)
+    +save(filename: str)
+    {static} +from_neural_density_map(neural_map: NeuralDensityMap,
+    \tseed: float, adjacency: float, min_nodes: int) : DensityGraph
+    {static} +from_voxel_density_map(filename: str, contour: float,
+    \tadjacency: float, min_nodes: int) : DensityGraph
+    {static} +load(filename: str) : DensityGraph
+}
+
+density_graph.DensityGraph *-- neural_density_map.NeuralDensityMap
+neural_density_map.NeuralDensityMap *-- "many" neural_density_map.NeuralDensityRegion
+neural_density_map.NeuralDensityMap *-- neural_density_map.ContinuousRegion
+neural_density_map.NeuralDensityRegion *-left- neural_density_map.ContinuousRegion
+
+' neural_density_map.NeuralDensityRegion *-- siren.Siren
+'siren.Siren *-- "many" siren.SineLayer
+
+@enduml
