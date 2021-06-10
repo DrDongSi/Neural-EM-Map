@@ -8,7 +8,7 @@ import os
 def neural_training_times(results_file: str) -> None:
     with open(results_file, 'r') as f:
         results = json.load(f)
-    fig, (g1, g2) = plt.subplots(1, 2)
+    fig, g1 = plt.subplots(1, 1)
 
     num_regions = [r["Neural region count"] for r in results]
     print("Number of neural regions:")
@@ -18,18 +18,14 @@ def neural_training_times(results_file: str) -> None:
     total_time = [r["Total training time"] for r in results]
     average_time = [r["Average region training time"] for r in results]
 
-    g1.set_title("Total Time")
-    g1.plot(voxel_count, total_time, 'bo', fillstyle='none')
+    g1.plot(voxel_count, [t / 60 for t in total_time], 'bo', fillstyle='none')
     g1.set_xlabel("Total voxel count")
-    g1.set_ylabel("Time (seconds)")
+    g1.set_ylabel("Time (minutes)")
     print("Total training time:")
     print(f"  Avg: {np.average(total_time)}")
     print(f"  Std: {np.std(total_time)}")
-
-    g2.set_title("Average Time Per Region")
-    g2.plot(voxel_count, average_time, 'bo', fillstyle='none')
-    g2.set_xlabel("Total voxel count")
-    g2.set_ylabel("Time (seconds)")
+    print(f"  Max: {np.max(total_time)}")
+    print(f"Number under an hour: {len([t for t in total_time if t < 360])}")
     print("Training time per region:")
     print(f"  Avg: {np.average(average_time)}")
     print(f"  Std: {np.std(average_time)}")
@@ -49,7 +45,12 @@ def neural_sizes(results_file: str) -> None:
     print("% Size Difference:")
     print(f"  Min: {np.min(abs(np.true_divide(neural_size, native_size) - 1))}")
     print(f"  Max: {np.max(abs(np.true_divide(neural_size, native_size) - 1))}")
+    print(f"  Median: {np.median(abs(np.true_divide(neural_size, native_size) - 1))}")
     print(f"  Avg: {np.average(abs(np.true_divide(neural_size, native_size) - 1))}")
+    print(f"  Std: {np.std(abs(np.true_divide(neural_size, native_size) - 1))}")
+    print("Max differences:")
+    print(f"  Max native: {np.max(native_size)}")
+    print(f"  Max neural: {np.max(neural_size)}")
 
     size_fit_x = np.unique(native_size)
     size_fit_y = np.poly1d(np.polyfit(native_size, neural_size, 1))(np.unique(native_size))

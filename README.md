@@ -5,6 +5,9 @@ Preprint: [Link](https://arxiv.org/abs/2104.01468)
 
 ## Repository Contents
 
+The standalone Nerual EM Map modules are contained in the `neural_em_map`
+folder.
+
 The two main modules for creating and using the neural cryo-EM maps and density
 graphs are the files `neural_density_map.py` and `density_graph.py`
 respectively. These modules, as well as the classes and functions within them,
@@ -15,6 +18,12 @@ SIREN neural network that is used by the neural cryo-EM map.
 The `experiments` folder contains the scripts used to perform the experiments
 and produce the visualizations described in the published work. See the
 Experiments section below for instructions on how to run the code.
+
+The `doc` folder contains a PlantUML document that produces the software
+architecture. The simplest way to produce the diagram is to open the document
+in Visual Studio Code and use the PlantUML extension (jebbs.plantuml). This
+allows the user to right-click in the document to preview or export the
+diagram as an image.
 
 ## Executing Code
 
